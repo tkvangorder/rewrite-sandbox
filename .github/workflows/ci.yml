@@ -20,19 +20,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        java: ["11"]
         os: ["ubuntu-latest"]
     runs-on: ${{ matrix.os }}
+    if: github.repository_owner == 'openrewrite'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
         with:
           fetch-depth: 0
       - name: set-up-jdk
-        uses: actions/setup-java@v3.4.1
+        uses: actions/setup-java@v2
         with:
-          distribution: zulu
-          java-version: 17
+          distribution: "adopt"
+          java-version: ${{ matrix.java }}
       - name: setup-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v2.1.6
         with:
           path: |
             ~/.gradle/caches
@@ -46,18 +48,18 @@ jobs:
   publish-snapshots:
     needs: [build]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && github.repository_owner == 'openrewrite'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
         with:
           fetch-depth: 0
       - name: set-up-jdk
-        uses: actions/setup-java@v3.4.1
+        uses: actions/setup-java@v2
         with:
-          distribution: zulu
-          java-version: 17
+          distribution: "adopt"
+          java-version: "11"
       - name: setup-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v2.1.6
         with:
           path: |
             ~/.gradle/caches
@@ -68,4 +70,9 @@ jobs:
       - name: publish-snapshots
         if: github.event_name == 'push'
         timeout-minutes: 30
-        run: ./gradlew ${GRADLE_SWITCHES} snapshot
+        run: ./gradlew ${GRADLE_SWITCHES} snapshot publish -PforceSigning
+        env:
+          ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.OSSRH_USERNAME }}
+          ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.OSSRH_TOKEN }}
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.OSSRH_SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.OSSRH_SIGNING_PASSWORD }}
