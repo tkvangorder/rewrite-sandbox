@@ -1,0 +1,18 @@
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: example.RemoveDeprecatedAnnotations
+displayName: Remove Deprecated Annotations
+description: Remove Deprecated Annotations
+recipeList:
+  - org.openrewrite.java.RemoveAnnotation:
+      annotationPattern: '@java.lang.Deprecated'
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: example.RemoveDeprecated11Annotations
+displayName: Remove Deprecated Annotations
+description: Remove Deprecated Annotations
+recipeList:
+  - org.openrewrite.java.RemoveAnnotation:
+      annotationPattern: '@java.lang.Deprecated(since="1.1.0")'
+
+

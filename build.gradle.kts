@@ -48,7 +48,7 @@ configurations.all {
 }
 
 //The bom version can also be set to a specific version or latest.release.
-val rewriteBomVersion = "latest.integration"
+val rewriteBomVersion = "latest.release"
 
 dependencies {
     compileOnly("org.projectlombok:lombok:latest.release")
@@ -70,6 +70,12 @@ dependencies {
 tasks.named<Test>("test") {
     useJUnitPlatform()
     jvmArgs = listOf("-XX:+UnlockDiagnosticVMOptions", "-XX:+ShowHiddenFrames")
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    options.encoding = "UTF-8"
+    options.compilerArgs.add("-parameters")
+    options.isFork = true
 }
 
 tasks.named<JavaCompile>("compileJava") {
