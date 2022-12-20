@@ -7,9 +7,11 @@ import org.openrewrite.java.tree.J;
 import org.openrewrite.test.RecipeSpec;
 import org.openrewrite.test.RewriteTest;
 
+
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.openrewrite.java.Assertions.java;
 
 class AddDeprecatedToMethodsTest implements RewriteTest {
 
@@ -20,8 +22,7 @@ class AddDeprecatedToMethodsTest implements RewriteTest {
         spec
           .recipe(new AddDeprecatedToMethods(null))
           .parser(JavaParser.fromJavaVersion()
-            .logCompilationWarningsAndErrors(true)
-            .build());
+            .logCompilationWarningsAndErrors(true));
     }
 
     @Test
@@ -32,7 +33,7 @@ class AddDeprecatedToMethodsTest implements RewriteTest {
         List<J.CompilationUnit> compilationUnits =parser.parse(
           """
                   package com.example;
-                  import java.util.List;
+                  import java.util.Lis t;
                   
                   public class Example {
                       @Deprecated(since = "1.1.0")
@@ -113,8 +114,7 @@ class AddDeprecatedToMethodsTest implements RewriteTest {
           (spec) -> spec
             .recipe(new AddDeprecatedToMethods("* *(java.util.List)"))
             .parser(JavaParser.fromJavaVersion()
-              .logCompilationWarningsAndErrors(true)
-              .build()),
+              .logCompilationWarningsAndErrors(true)),
           java(
             """
             import java.util.List;

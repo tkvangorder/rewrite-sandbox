@@ -5,6 +5,8 @@ import org.openrewrite.config.Environment;
 import org.openrewrite.java.JavaParser;
 import org.openrewrite.test.RewriteTest;
 
+import static org.openrewrite.java.Assertions.java;
+
 class RemoveAnnotationsTest implements RewriteTest {
 
     @Test
@@ -16,7 +18,7 @@ class RemoveAnnotationsTest implements RewriteTest {
                 .recipe(env.activateRecipes("example.RemoveDeprecatedAnnotations"))
                 .parser(JavaParser.fromJavaVersion()
                   .logCompilationWarningsAndErrors(true)
-                  .build());
+                  );
           },
           java(
             """
@@ -60,8 +62,7 @@ class RemoveAnnotationsTest implements RewriteTest {
               spec
                 .recipe(env.activateRecipes("example.RemoveDeprecated11Annotations"))
                 .parser(JavaParser.fromJavaVersion()
-                  .logCompilationWarningsAndErrors(true)
-                  .build());
+                  .logCompilationWarningsAndErrors(true));
           },
           java(
             """
@@ -107,8 +108,7 @@ class RemoveAnnotationsTest implements RewriteTest {
               spec
                 .recipe(env.activateRecipes("example.RemoveDeprecated11Annotations"))
                 .parser(JavaParser.fromJavaVersion()
-                  .logCompilationWarningsAndErrors(true)
-                  .build());
+                  .logCompilationWarningsAndErrors(true));
           },
           java(
             """
@@ -153,8 +153,7 @@ class RemoveAnnotationsTest implements RewriteTest {
           (spec) -> spec
             .recipe(new RemoveAnnotationFromMethodsOnly(null, "@java.lang.Deprecated(since=\"1.2.0\")"))
             .parser(JavaParser.fromJavaVersion()
-              .logCompilationWarningsAndErrors(true)
-              .build()),
+              .logCompilationWarningsAndErrors(true)),
           java(
             """
                   import java.util.List;

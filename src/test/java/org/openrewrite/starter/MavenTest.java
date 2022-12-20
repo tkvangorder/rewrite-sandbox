@@ -11,6 +11,7 @@ import org.openrewrite.xml.tree.Xml;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.openrewrite.maven.Assertions.pomXml;
 
 class MavenTest implements RewriteTest {
 
@@ -205,7 +206,7 @@ class MavenTest implements RewriteTest {
     void updateCommonFileUploads() {
         rewriteRun(
           (spec) -> spec
-            .recipe(new UpgradeDependencyVersion("commons-fileupload", "commons-fileupload", "1.4", null, true)),
+            .recipe(new UpgradeDependencyVersion("commons-fileupload", "commons-fileupload", "1.4", null, true, null)),
           pomXml(
             """
                 <project>
