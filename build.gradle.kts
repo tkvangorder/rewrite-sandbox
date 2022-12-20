@@ -30,7 +30,7 @@ java {
 }
 
 // Set as appropriate for your organization
-group = "com.yourorg"
+group = "org.tkvangorder"
 description = "Rewrite recipes."
 
 repositories {
@@ -59,7 +59,10 @@ dependencies {
     implementation(platform("org.openrewrite.recipe:rewrite-recipe-bom:${rewriteBomVersion}"))
 
     implementation("org.openrewrite:rewrite-java")
+    implementation("org.openrewrite:rewrite-maven")
     runtimeOnly("org.openrewrite:rewrite-java-17")
+    //rewrite uses SLF4J to produce parser output.
+    runtimeOnly("ch.qos.logback:logback-classic:1.2.+")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:latest.release")
     testImplementation("org.junit.jupiter:junit-jupiter-params:latest.release")
