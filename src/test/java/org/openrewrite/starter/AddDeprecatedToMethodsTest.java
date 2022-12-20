@@ -33,7 +33,7 @@ class AddDeprecatedToMethodsTest implements RewriteTest {
         List<J.CompilationUnit> compilationUnits =parser.parse(
           """
                   package com.example;
-                  import java.util.Lis t;
+                  import java.util.List;
                   
                   public class Example {
                       @Deprecated(since = "1.1.0")
@@ -93,11 +93,11 @@ class AddDeprecatedToMethodsTest implements RewriteTest {
                       @Deprecated(since = "1.1.0")
                       public void methodA() {
                       }
-                  \n
+
                       @Deprecated(since = "1.1.0")
                       public void methodB(List<String> values) {
                       }
-                  \n
+
                       @Deprecated(since = "1.1.0")
                       public String methodC(List<String> values) {
                         return null;
@@ -135,11 +135,11 @@ class AddDeprecatedToMethodsTest implements RewriteTest {
                   class Test {
                       public void methodA() {
                       }
-                  \n
+
                       @Deprecated(since = "1.1.0")
                       public void methodB(List<String> values) {
                       }
-                  \n
+
                       @Deprecated(since = "1.1.0")
                       public String methodC(List<String> values) {
                         return null;

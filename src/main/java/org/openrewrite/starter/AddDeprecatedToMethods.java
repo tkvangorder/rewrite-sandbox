@@ -46,12 +46,12 @@ public class AddDeprecatedToMethods extends Recipe {
 
     @Override
     public String getDisplayName() {
-        return "Add `@Deprecated to any method declaration that matches the method pattern.";
+        return "Add `@Deprecated to any method declaration that matches the method pattern";
     }
 
     @Override
     public String getDescription() {
-        return "This is just a demonstration of how to add annotations to a method declaration";
+        return "This is just a demonstration of how to add annotations to a method declaration.";
     }
 
     @Override

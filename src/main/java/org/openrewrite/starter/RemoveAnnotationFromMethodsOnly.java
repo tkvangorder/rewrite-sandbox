@@ -53,7 +53,7 @@ public class RemoveAnnotationFromMethodsOnly extends Recipe {
 
     @Override
     public String getDescription() {
-        return "This is just a demonstration of how to remove annotations from a method declaration";
+        return "This is just a demonstration of how to remove annotations from a method declaration.";
     }
 
     @Override
