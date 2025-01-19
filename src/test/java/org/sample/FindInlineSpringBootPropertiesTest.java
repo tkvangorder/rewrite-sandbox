@@ -32,11 +32,9 @@ class FindInlineSpringBootPropertiesTest implements RewriteTest {
     @Test
     void findInlineValueAnnotation() {
         rewriteRun(
-          spec -> spec.dataTable(SpringBootPropertyReport.Row.class, rows -> {
-              assertThat(rows).containsExactly(
-                new SpringBootPropertyReport.Row("my.property", "org/cool/MyClass.java")
-              );
-          }),
+          spec -> spec.dataTable(SpringBootPropertyReport.Row.class, rows -> assertThat(rows).containsExactly(
+            new SpringBootPropertyReport.Row("my.property", "org/cool/MyClass.java")
+          )),
           //language=java
           java(
             """
@@ -55,12 +53,10 @@ class FindInlineSpringBootPropertiesTest implements RewriteTest {
     @Test
     void findNestedInlineValueAnnotation() {
         rewriteRun(
-          spec -> spec.dataTable(SpringBootPropertyReport.Row.class, rows -> {
-              assertThat(rows).containsExactly(
-                new SpringBootPropertyReport.Row("my.property", "org/cool/MyClass.java"),
-                new SpringBootPropertyReport.Row("my.other.property", "org/cool/MyClass.java")
-              );
-          }),
+          spec -> spec.dataTable(SpringBootPropertyReport.Row.class, rows -> assertThat(rows).containsExactly(
+            new SpringBootPropertyReport.Row("my.property", "org/cool/MyClass.java"),
+            new SpringBootPropertyReport.Row("my.other.property", "org/cool/MyClass.java")
+          )),
           //language=java
           java(
             """
@@ -79,11 +75,9 @@ class FindInlineSpringBootPropertiesTest implements RewriteTest {
     @Test
     void conditionalOnPropertyValue() {
         rewriteRun(
-          spec -> spec.dataTable(SpringBootPropertyReport.Row.class, rows -> {
-              assertThat(rows).containsExactly(
-                new SpringBootPropertyReport.Row("my.property", "MyClass.java")
-              );
-          }),
+          spec -> spec.dataTable(SpringBootPropertyReport.Row.class, rows -> assertThat(rows).containsExactly(
+            new SpringBootPropertyReport.Row("my.property", "MyClass.java")
+          )),
           //language=java
           java(
             """
@@ -100,11 +94,9 @@ class FindInlineSpringBootPropertiesTest implements RewriteTest {
     @Test
     void conditionalOnPropertyNameAndPrefix() {
         rewriteRun(
-          spec -> spec.dataTable(SpringBootPropertyReport.Row.class, rows -> {
-              assertThat(rows).containsExactly(
-                new SpringBootPropertyReport.Row("my.property", "\"${my.property}\"")
-              );
-          }),
+          spec -> spec.dataTable(SpringBootPropertyReport.Row.class, rows -> assertThat(rows).containsExactly(
+            new SpringBootPropertyReport.Row("my.property", "MyClass.java")
+          )),
           //language=java
           java(
             """
@@ -118,4 +110,42 @@ class FindInlineSpringBootPropertiesTest implements RewriteTest {
         );
     }
 
+    @Test
+    void conditionalOnPropertyNameArrayAndPrefix() {
+        rewriteRun(
+          spec -> spec.dataTable(SpringBootPropertyReport.Row.class, rows -> assertThat(rows).containsExactly(
+            new SpringBootPropertyReport.Row("my.property", "MyClass.java")
+          )),
+          //language=java
+          java(
+            """
+              import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+
+              @ConditionalOnProperty(name={"property"}, prefix="my")
+              public class MyClass {
+              }
+              """
+          )
+        );
+    }
+
+    @Test
+    void conditionalOnPropertyTwoProperties() {
+        rewriteRun(
+          spec -> spec.dataTable(SpringBootPropertyReport.Row.class, rows -> assertThat(rows).containsExactly(
+            new SpringBootPropertyReport.Row("my.property", "MyClass.java"),
+            new SpringBootPropertyReport.Row("my.other-property", "MyClass.java")
+          )),
+          //language=java
+          java(
+            """
+              import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+             
+              @ConditionalOnProperty(name={"property", "other-property"}, prefix="my")
+              public class MyClass {
+              }
+              """
+          )
+        );
+    }
 }
