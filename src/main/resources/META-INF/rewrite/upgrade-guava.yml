@@ -1,0 +1,12 @@
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.sample.UpgradeGuava
+displayName: UpgradeGuava
+description: "This recipe upgrades the Guava dependency to version 33.x."
+recipeList:
+  - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
+      groupId: com.google.guava
+      artifactId: guava
+      newVersion: 33.x
+      versionPattern: -jre
+      overrideManagedVersion: "true"
