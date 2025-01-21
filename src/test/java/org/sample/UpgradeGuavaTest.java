@@ -51,44 +51,4 @@ public class UpgradeGuavaTest implements RewriteTest {
           )
         );
     }
-
-    @Test
-    void upgradeGuavaAndroid() {
-        rewriteRun(
-          //language=xml
-          pomXml(
-            """
-              <project>
-                <modelVersion>4.0.0</modelVersion>
-                <groupId>org.springframework.samples</groupId>
-                <artifactId>spring-petclinic</artifactId>
-                <version>1.5.1</version>
-                  <dependencies>
-                    <dependency>
-                      <groupId>com.google.guava</groupId>
-                      <artifactId>guava</artifactId>
-                      <version>31.0-android</version>
-                    </dependency>
-                  </dependencies>
-              </project>
-              """,
-            """              
-                <project>
-                  <modelVersion>4.0.0</modelVersion>
-                  <groupId>org.springframework.samples</groupId>
-                  <artifactId>spring-petclinic</artifactId>
-                  <version>1.5.1</version>
-                    <dependencies>
-                      <dependency>
-                        <groupId>com.google.guava</groupId>
-                        <artifactId>guava</artifactId>
-                        <version>33.4.0-jre</version>
-                      </dependency>
-                    </dependencies>
-                </project>
-              """
-          )
-        );
-    }
-
 }

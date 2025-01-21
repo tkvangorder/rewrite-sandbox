@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yourorg;
+package org.sample;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;

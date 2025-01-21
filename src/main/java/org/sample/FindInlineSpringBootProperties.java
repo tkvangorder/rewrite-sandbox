@@ -1,6 +1,8 @@
 package org.sample;
 
 import com.yourorg.table.SpringBootPropertyReport;
+import lombok.EqualsAndHashCode;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
 import org.openrewrite.*;
@@ -9,6 +11,7 @@ import org.openrewrite.java.JavaIsoVisitor;
 import org.openrewrite.java.tree.Expression;
 import org.openrewrite.java.tree.J;
 import org.openrewrite.java.tree.TypeUtils;
+import org.openrewrite.marker.SearchResult;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -16,10 +19,21 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.yourorg.table.SpringBootPropertyReport.Row;
+import static com.yourorg.table.SpringBootPropertyReport.Type;
+
 @Slf4j
+@Value
+@EqualsAndHashCode(callSuper = false)
 public class FindInlineSpringBootProperties extends Recipe {
 
   transient SpringBootPropertyReport report = new SpringBootPropertyReport(this);
+
+  @Option(displayName = "Mark annotations in source files",
+          description = "A flag to indicate if the recipe should also mark the annotations that contain the properties.",
+          required = false)
+  @Nullable
+  Boolean markAnnotations;
 
   @Override
   public String getDisplayName() {
@@ -34,24 +48,39 @@ public class FindInlineSpringBootProperties extends Recipe {
   @Override
   public TreeVisitor<?, ExecutionContext> getVisitor() {
     return new JavaIsoVisitor<ExecutionContext>() {
+
       @Override
+      @SuppressWarnings("DataFlowIssue")
       public J.Annotation visitAnnotation(J.Annotation annotation, ExecutionContext executionContext) {
 
         if (TypeUtils.isOfClassType(annotation.getType(), "org.springframework.beans.factory.annotation.Value")) {
           // Extract any properties from the @Value annotation and record them in the data table along with the source
           // file where the value annotation is found.
           Set<String> properties = extractPropertiesFromValueAnnotation(annotation);
+          if (properties.isEmpty()) {
+            return SearchResult.found(annotation, "Annotation found but could not extract property.");
+          }
           String sourcePath = getSourcePath();
           for (String property : properties) {
-            report.insertRow(executionContext, new SpringBootPropertyReport.Row(property,sourcePath));
+            report.insertRow(executionContext, new Row(property, Type.VALUE, sourcePath));
+          }
+          if (markAnnotations()) {
+            return SearchResult.found(annotation);
           }
         } else if (TypeUtils.isOfClassType(annotation.getType(), "org.springframework.boot.autoconfigure.condition.ConditionalOnProperty")) {
           // Extract any properties from the @ConditionalOnProperty annotation and record them in the data table along with the source
           // file where the value annotation is found.
           Set<String> properties = extractPropertiesFromConditionalAnnotation(annotation);
+          if (properties.isEmpty()) {
+            return SearchResult.found(annotation, "Annotation found but could not extract property.");
+          }
+
           String sourcePath = getSourcePath();
           for (String property : properties) {
-            report.insertRow(executionContext, new SpringBootPropertyReport.Row(property, sourcePath));
+            report.insertRow(executionContext, new SpringBootPropertyReport.Row(property, Type.CONDITIONAL, sourcePath));
+          }
+          if (markAnnotations()) {
+            return SearchResult.found(annotation);
           }
         }
         return super.visitAnnotation(annotation, executionContext);
@@ -63,6 +92,10 @@ public class FindInlineSpringBootProperties extends Recipe {
       }
 
     };
+  }
+
+  private boolean markAnnotations() {
+    return markAnnotations != null && markAnnotations;
   }
 
   static PropertyPlaceholderHelper placeholderHelper = new PropertyPlaceholderHelper("${", "}", ":");

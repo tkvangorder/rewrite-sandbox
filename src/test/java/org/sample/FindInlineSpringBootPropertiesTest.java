@@ -8,13 +8,15 @@ import org.openrewrite.test.RewriteTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.openrewrite.java.Assertions.java;
+import static com.yourorg.table.SpringBootPropertyReport.Type;
+import static com.yourorg.table.SpringBootPropertyReport.Row;
 
 class FindInlineSpringBootPropertiesTest implements RewriteTest {
 
     @Override
     public void defaults(RecipeSpec spec) {
         spec
-          .recipe(new FindInlineSpringBootProperties())
+          .recipe(new FindInlineSpringBootProperties(false))
           // The parser here is used to parse the "before" test case and must be aware of all types used in the test case
           // to get proper type attribution. Remember type attribution is OpenRewrite's superpower.
           .parser(JavaParser
@@ -26,21 +28,28 @@ class FindInlineSpringBootPropertiesTest implements RewriteTest {
               CodeStubs.SPRING_VALUE,
               CodeStubs.SPRING_CONDITIONAL_ON_PROPERTY
             )
+            // The second way to add types is add a .jar file from the classpath, this is finding the jar file by
+            // parsing the classpath and finding the .jar file location.
+            .classpath("lombok-1.18.36")
           );
     }
+
+    // NOTE, this test also includes Lombok's Value annotation to demonstrate the importance of type information.
 
     @Test
     void findInlineValueAnnotation() {
         rewriteRun(
           spec -> spec.dataTable(SpringBootPropertyReport.Row.class, rows -> assertThat(rows).containsExactly(
-            new SpringBootPropertyReport.Row("my.property", "org/cool/MyClass.java")
+            new Row("my.property", Type.VALUE, "org/cool/MyClass.java")
           )),
           //language=java
           java(
             """
               package org.cool;
+              
               import org.springframework.beans.factory.annotation.Value;
 
+              @lombok.Value
               public class MyClass {
                   @Value("${my.property}")
                   private String myProperty;
@@ -54,8 +63,8 @@ class FindInlineSpringBootPropertiesTest implements RewriteTest {
     void findNestedInlineValueAnnotation() {
         rewriteRun(
           spec -> spec.dataTable(SpringBootPropertyReport.Row.class, rows -> assertThat(rows).containsExactly(
-            new SpringBootPropertyReport.Row("my.property", "org/cool/MyClass.java"),
-            new SpringBootPropertyReport.Row("my.other.property", "org/cool/MyClass.java")
+            new Row("my.property", Type.VALUE, "org/cool/MyClass.java"),
+            new Row("my.other.property", Type.VALUE, "org/cool/MyClass.java")
           )),
           //language=java
           java(
@@ -76,7 +85,7 @@ class FindInlineSpringBootPropertiesTest implements RewriteTest {
     void conditionalOnPropertyValue() {
         rewriteRun(
           spec -> spec.dataTable(SpringBootPropertyReport.Row.class, rows -> assertThat(rows).containsExactly(
-            new SpringBootPropertyReport.Row("my.property", "MyClass.java")
+            new Row("my.property", Type.CONDITIONAL, "MyClass.java")
           )),
           //language=java
           java(
@@ -95,7 +104,7 @@ class FindInlineSpringBootPropertiesTest implements RewriteTest {
     void conditionalOnPropertyNameAndPrefix() {
         rewriteRun(
           spec -> spec.dataTable(SpringBootPropertyReport.Row.class, rows -> assertThat(rows).containsExactly(
-            new SpringBootPropertyReport.Row("my.property", "MyClass.java")
+            new Row("my.property", Type.CONDITIONAL, "MyClass.java")
           )),
           //language=java
           java(
@@ -114,7 +123,7 @@ class FindInlineSpringBootPropertiesTest implements RewriteTest {
     void conditionalOnPropertyNameArrayAndPrefix() {
         rewriteRun(
           spec -> spec.dataTable(SpringBootPropertyReport.Row.class, rows -> assertThat(rows).containsExactly(
-            new SpringBootPropertyReport.Row("my.property", "MyClass.java")
+            new Row("my.property", Type.CONDITIONAL, "MyClass.java")
           )),
           //language=java
           java(
@@ -133,8 +142,8 @@ class FindInlineSpringBootPropertiesTest implements RewriteTest {
     void conditionalOnPropertyTwoProperties() {
         rewriteRun(
           spec -> spec.dataTable(SpringBootPropertyReport.Row.class, rows -> assertThat(rows).containsExactly(
-            new SpringBootPropertyReport.Row("my.property", "MyClass.java"),
-            new SpringBootPropertyReport.Row("my.other-property", "MyClass.java")
+            new Row("my.property", Type.CONDITIONAL, "MyClass.java"),
+        new Row("my.other-property", Type.CONDITIONAL, "MyClass.java")
           )),
           //language=java
           java(
@@ -148,4 +157,44 @@ class FindInlineSpringBootPropertiesTest implements RewriteTest {
           )
         );
     }
+
+    @Test
+    void indirectPropertyName() {
+        rewriteRun(
+          //language=java
+          java(
+            """
+              package org.cool;
+              
+              import org.springframework.beans.factory.annotation.Value;
+
+              public class MyConfiguration {
+    
+                public static final String MY_PROPERTY = "my.property";
+        
+                public class MyClass {
+                  @Value(MY_PROPERTY)
+                  private String myProperty;
+                }
+              }
+              """,
+            """
+              package org.cool;
+              
+              import org.springframework.beans.factory.annotation.Value;
+
+              public class MyConfiguration {
+    
+                public static final String MY_PROPERTY = "my.property";
+        
+                public class MyClass {
+                  /*~~(Annotation found but could not extract property.)~~>*/@Value(MY_PROPERTY)
+                  private String myProperty;
+                }
+              }
+              """
+          )
+        );
+    }
+
 }

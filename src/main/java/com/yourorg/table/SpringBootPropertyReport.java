@@ -19,8 +19,17 @@ public class SpringBootPropertyReport extends DataTable<SpringBootPropertyReport
                 description = "Name of the Spring property.")
         String propertyName;
 
+        @Column(displayName = "Type",
+                description = "Is the property a value or conditional property.")
+        Type type;
+
         @Column(displayName = "Property reference",
                 description = "Where the property is referenced codebase.")
         String source;
+    }
+
+    public enum Type {
+        VALUE,
+        CONDITIONAL
     }
 }
