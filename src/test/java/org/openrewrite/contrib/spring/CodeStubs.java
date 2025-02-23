@@ -1,4 +1,4 @@
-package org.sample;
+package org.openrewrite.contrib.spring;
 
 import org.intellij.lang.annotations.Language;
 

@@ -1,4 +1,4 @@
 @NullMarked
-package org.sample.properties.converter;
+package org.openrewrite.contrib.convert;
 
 import org.jspecify.annotations.NullMarked;

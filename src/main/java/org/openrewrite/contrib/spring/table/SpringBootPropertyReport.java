@@ -1,4 +1,4 @@
-package com.yourorg.table;
+package org.openrewrite.contrib.spring.table;
 
 import lombok.Value;
 import org.openrewrite.Column;

@@ -1,6 +1,6 @@
-package org.sample;
+package org.openrewrite.contrib.spring;
 
-import org.sample.table.SpringBootPropertyReport;
+import org.openrewrite.contrib.spring.table.SpringBootPropertyReport;
 import org.junit.jupiter.api.Test;
 import org.openrewrite.java.JavaParser;
 import org.openrewrite.test.RecipeSpec;
@@ -8,8 +8,8 @@ import org.openrewrite.test.RewriteTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.openrewrite.java.Assertions.java;
-import static org.sample.table.SpringBootPropertyReport.Type;
-import static org.sample.table.SpringBootPropertyReport.Row;
+import static org.openrewrite.contrib.spring.table.SpringBootPropertyReport.Type;
+import static org.openrewrite.contrib.spring.table.SpringBootPropertyReport.Row;
 
 class FindInlineSpringBootPropertiesTest implements RewriteTest {
 

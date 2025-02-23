@@ -1,8 +1,0 @@
----
-type: specs.openrewrite.org/v1beta/recipe
-name: org.sample.UpgradeSpringBoot
-displayName: Upgrade a Spring Boot Project
-description: "This recipe upgrades a Spring Boot project with some additional customizations."
-recipeList:
-  - org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3
-  - org.sample.UpgradeGuava
