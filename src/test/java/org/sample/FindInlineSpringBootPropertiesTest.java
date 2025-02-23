@@ -1,6 +1,6 @@
 package org.sample;
 
-import com.yourorg.table.SpringBootPropertyReport;
+import org.sample.table.SpringBootPropertyReport;
 import org.junit.jupiter.api.Test;
 import org.openrewrite.java.JavaParser;
 import org.openrewrite.test.RecipeSpec;
@@ -8,8 +8,8 @@ import org.openrewrite.test.RewriteTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.openrewrite.java.Assertions.java;
-import static com.yourorg.table.SpringBootPropertyReport.Type;
-import static com.yourorg.table.SpringBootPropertyReport.Row;
+import static org.sample.table.SpringBootPropertyReport.Type;
+import static org.sample.table.SpringBootPropertyReport.Row;
 
 class FindInlineSpringBootPropertiesTest implements RewriteTest {
 
@@ -52,7 +52,7 @@ class FindInlineSpringBootPropertiesTest implements RewriteTest {
               @lombok.Value
               public class MyClass {
                   @Value("${my.property}")
-                  private String myProperty;
+                  String myProperty;
               }
               """
           )
@@ -73,7 +73,7 @@ class FindInlineSpringBootPropertiesTest implements RewriteTest {
               import org.springframework.beans.factory.annotation.Value;
 
               public class MyClass {
-                  @Value("${my.property:${my.other.property}:default}")
+                  @Value("${my.property}-${my.other.property}:default}")
                   private String myProperty;
               }
               """

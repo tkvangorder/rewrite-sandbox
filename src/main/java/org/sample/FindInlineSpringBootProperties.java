@@ -1,6 +1,6 @@
 package org.sample;
 
-import com.yourorg.table.SpringBootPropertyReport;
+import org.sample.table.SpringBootPropertyReport;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
@@ -19,8 +19,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.yourorg.table.SpringBootPropertyReport.Row;
-import static com.yourorg.table.SpringBootPropertyReport.Type;
+import static org.sample.table.SpringBootPropertyReport.Row;
+import static org.sample.table.SpringBootPropertyReport.Type;
 
 @Slf4j
 @Value
