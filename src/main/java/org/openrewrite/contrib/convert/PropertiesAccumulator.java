@@ -86,7 +86,7 @@ public class PropertiesAccumulator {
       }
     }
     // Set the value at the leaf node
-    currentMap.put(propertyParts.getLast(), value);
+    currentMap.put(propertyParts.get(propertyParts.size() - 1), value);
   }
 
 }
