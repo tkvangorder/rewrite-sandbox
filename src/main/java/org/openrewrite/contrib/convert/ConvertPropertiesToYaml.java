@@ -39,8 +39,6 @@ public class ConvertPropertiesToYaml extends ScanningRecipe<PropertiesAccumulato
       required = false)
   String yamlSuffix;
 
-
-
   public ConvertPropertiesToYaml(@Nullable String filePattern, @Nullable Boolean sortKeys, @Nullable String yamlSuffix) {
     //noinspection DataFlowIssue
     this.filePattern = PathUtils.normalize(filePattern == null ? "**" : filePattern);
