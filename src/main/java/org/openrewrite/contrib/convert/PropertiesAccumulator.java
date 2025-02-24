@@ -30,21 +30,35 @@ public class PropertiesAccumulator {
 
   public void collectSourceFileProperties(Properties.File sourceFile) {
     Map<String, Object> propertyMap = sorted ? new TreeMap<>() : new LinkedHashMap<>();
+    List<String> accumulatedComments = new ArrayList<>();
     new PropertiesVisitor<Map<String, Object>>() {
       @Override
       public org.openrewrite.properties.tree.Properties visitEntry(Properties.Entry entry, Map<String, Object> stringObjectMap) {
-        addProperty(stringObjectMap, Arrays.asList(entry.getKey().split("\\.")), entry.getValue().getText());
+        addProperty(stringObjectMap, Arrays.asList(entry.getKey().split("\\.")), entry.getValue().getText(), new ArrayList<>(accumulatedComments));
+        accumulatedComments.clear();
         return super.visitEntry(entry, stringObjectMap);
+      }
+
+      @Override
+      public Properties visitComment(Properties.Comment comment, Map<String, Object> stringObjectMap) {
+        accumulatedComments.add(comment.getMessage());
+        return super.visitComment(comment, stringObjectMap);
       }
     }.visit(sourceFile, propertyMap);
     pathToProperties.put(sourceFile.getSourcePath(), propertyMap);
-    pathToSourceFile.put(sourceFile.getSourcePath(), sourceFile);
   }
 
   public void collectSourceFileProperties(Yaml.Documents sourceFile) {
     Map<String, Object> propertyMap = sorted ? new TreeMap<>() : new LinkedHashMap<>();
+    List<String> accumulatedComments = new ArrayList<>();
     new YamlVisitor<Map<String, Object>>() {
       private final Deque<String> path = new ArrayDeque<>();
+
+      @Override
+      public Yaml visitMapping(Yaml.Mapping mapping, Map<String, Object> stringObjectMap) {
+        accumulatedComments.addAll(YamlConverterUtils.extractComments(mapping.getPrefix()));
+        return super.visitMapping(mapping, stringObjectMap);
+      }
 
       @Override
       public Yaml visitMappingEntry(Yaml.Mapping.Entry entry, Map<String, Object> stringObjectMap) {
@@ -56,37 +70,38 @@ public class PropertiesAccumulator {
 
       @Override
       public Yaml visitScalar(Yaml.Scalar scalar, Map<String, Object> stringObjectMap) {
-        addProperty(propertyMap, new ArrayList<>(path), scalar.getValue());
+        addProperty(propertyMap, new ArrayList<>(path), scalar.getValue(), Collections.unmodifiableList(accumulatedComments));
+        accumulatedComments.clear();
         return super.visitScalar(scalar, stringObjectMap);
       }
-
     }.visit(sourceFile, propertyMap);
     pathToProperties.put(sourceFile.getSourcePath(), propertyMap);
-    pathToSourceFile.put(sourceFile.getSourcePath(), sourceFile);
   }
 
-
-  private void addProperty(Map<String, Object> propertyMap, List<String> propertyParts, Object value) {
+  private void addProperty(Map<String, Object> propertyMap, List<String> propertyParts, Object value, List<String> comments) {
     Map<String, Object> currentMap = propertyMap;
 
     Deque<String> path = new ArrayDeque<>();
-    for (String part : propertyParts) {
-      path.addLast(part);
-      Object existing = currentMap.computeIfAbsent(part, k -> sorted ? new TreeMap<String,Object>() : new LinkedHashMap<String,Object>());
+    for (Iterator<String> index = propertyParts.iterator(); index.hasNext(); ) {
+      String part = index.next();
+      if (index.hasNext()) {
+        path.addLast(part);
+        Object existing = currentMap.computeIfAbsent(part, k -> sorted ? new TreeMap<String,Object>() : new LinkedHashMap<String,Object>());
 
-      if (existing instanceof Map) {
-        //noinspection unchecked
-        currentMap = (Map<String, Object>) existing;
-      } else {
-        // Cannot create a path through a non-map value
-        throw new IllegalArgumentException(
-            "Cannot create property '" + String.join(".", propertyParts) + "' because '" +
-                String.join(".", path)+ "' is not a map"
-        );
+        if (existing instanceof Map) {
+          //noinspection unchecked
+          currentMap = (Map<String, Object>) existing;
+        } else {
+          // Cannot create a path through a non-map value
+          throw new IllegalArgumentException(
+              "Cannot create property '" + String.join(".", propertyParts) + "' because '" +
+                  String.join(".", path)+ "' is not a map"
+          );
+        }
       }
     }
     // Set the value at the leaf node
-    currentMap.put(propertyParts.get(propertyParts.size() - 1), value);
+    currentMap.put(propertyParts.get(propertyParts.size() - 1), new PropertyValue(comments, value));
   }
 
 }
